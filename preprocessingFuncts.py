@@ -54,13 +54,13 @@ def readUserData():
     users["gender"].replace(['F', 'M'], [0, 1], inplace=True)
     users["occupation"].replace(occupation_list, list(
         range(0, len(occupation_list))), inplace=True)
+    users["age_category"] = pd.cut(users["age"], bins=[
+                                   0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8])
     return users
-
 
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
     # can specify what we wanna analyze from categ input
-    # TODO - improve age by having an agespan
     user_header = ["user_id"]
     user_header.extend(categ)
     _user = users.loc[:, user_header]
@@ -85,12 +85,6 @@ def specifyByItemData(items, ratings, categ):
 # TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
 # REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
 
-# TODO - connect the item ID to genres
-# TODO - age grouping for age ranges - rendy
+''' similarities '''
+# TODO - connect the ratings ID to item
 # TODO - compare user info with genres
-
-
-# ratings = readRatingData()
-# users = readUserData()
-# specifyByUserData(users, ratings, ["gender"])
-readItemData()
