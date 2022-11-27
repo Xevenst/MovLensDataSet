@@ -65,16 +65,16 @@ def specifyByUserData(users, ratings, categ):
     return df
   
 def specifyByItemData():
-  # TODO
+  # TODO - astrid
   pass
 
-# TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html
+# TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
 # REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
 
 # TODO - connect the item ID to genres
-# TODO - age grouping for age ranges
-# TODO - compare user info with genres
-# TODO - get year for movie when they're released
+# TODO - age grouping for age ranges - rendy
+# TODO - compare user info with genres 
+# TODO - get year for movie when they're released - rendy
 
 ratings = readRatingData()
 users = readUserData()
