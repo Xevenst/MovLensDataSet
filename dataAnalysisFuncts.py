@@ -7,4 +7,4 @@
 # similarity between item categs
 # Best/worst ratings for user categs
 # Best/worst ratings for item categs
-# User relation to item item categs
+# User relation to item item categs.

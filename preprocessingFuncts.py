@@ -67,7 +67,11 @@ def specifyByUserData(users, ratings, categ):
 def specifyByItemData():
   # TODO
   pass
-  
+
+# TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html
+# REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
+
+# TODO - connect the item ID to genres
 # TODO - age grouping for age ranges
 # TODO - compare user info with genres
 # TODO - get year for movie when they're released
