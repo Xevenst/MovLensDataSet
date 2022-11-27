@@ -34,9 +34,12 @@ def readItemData():
                     "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
     movies = pd.read_csv("ml-100k\\u.item", sep='|',
                          header=None, encoding='latin1', names=movie_header)
+    movies["release_date"] = movies["release_date"].map(
+        lambda x: x[-4:] if type(x)==str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
-        columns=['video_release_date', "title", "release_date", "IMDb_URL"])
+        columns=['video_release_date', "title", "IMDb_URL"])
+    movies = movies.rename(columns={"release_date": "year"})
     return movies
 
 
@@ -63,19 +66,31 @@ def specifyByUserData(users, ratings, categ):
     _user = users.loc[:, user_header]
     df = pd.merge(_user, ratings, on=['user_id'])
     return df
-  
-def specifyByItemData():
-  # TODO - astrid
-  pass
+
+
+def specifyByItemData(items, ratings, categ):
+    # categ only 2, genres or year
+    item_header = ["item_id"]
+    if categ == "year":
+        item_header.append("year")
+    elif categ == "genres":
+        item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
+                           "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
+    else:
+        return 0
+    _item = items.loc[:, item_header]
+    df = pd.merge(_item, ratings, on=['item_id'])
+    return df
 
 # TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
 # REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
 
 # TODO - connect the item ID to genres
 # TODO - age grouping for age ranges - rendy
-# TODO - compare user info with genres 
-# TODO - get year for movie when they're released - rendy
+# TODO - compare user info with genres
 
-ratings = readRatingData()
-users = readUserData()
-specifyByUserData(users, ratings, ["gender"])
+
+# ratings = readRatingData()
+# users = readUserData()
+# specifyByUserData(users, ratings, ["gender"])
+readItemData()
