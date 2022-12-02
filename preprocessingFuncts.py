@@ -21,18 +21,18 @@ u.genre is to accompany u.item
 # first, read the rating data
 
 
-def readRatingData():
+def readRatingData(path="ml-100k\\u.data"):
     rating_header = ["user_id", "item_id", "rating", "timestamp"]
-    rating = pd.read_csv("ml-100k\\u.data", sep='\t',
+    rating = pd.read_csv(path, sep='\t',
                          header=None, names=rating_header)
     rating = rating.drop(['timestamp'], axis=1)
     return rating
 
 
-def readItemData():
+def readItemData(path="ml-100k\\u.item"):
     movie_header = ["item_id", "title", "release_date", "video_release_date", "IMDb_URL", "unknown", "Action", "Adventure", "Animation", "Children's",
                     "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
-    movies = pd.read_csv("ml-100k\\u.item", sep='|',
+    movies = pd.read_csv(path, sep='|',
                          header=None, encoding='latin1', names=movie_header)
     movies["release_date"] = movies["release_date"].map(
         lambda x: x[-4:] if type(x)==str else x)
@@ -43,9 +43,9 @@ def readItemData():
     return movies
 
 
-def readUserData():
+def readUserData(path="ml-100k\\u.user"):
     user_header = ["user_id", "age", "gender", "occupation", "zip_code"]
-    users = pd.read_csv("ml-100k\\u.user", sep='|',
+    users = pd.read_csv(path, sep='|',
                         header=None, names=user_header)
 
     occupation = pd.read_csv("ml-100k\\u.occupation", header=None)
@@ -73,7 +73,7 @@ def specifyByItemData(items, ratings, categ):
     item_header = ["item_id"]
     if categ == "year":
         item_header.append("year")
-    elif categ == "genres":
+    if categ == "genres":
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
