@@ -35,7 +35,7 @@ def readItemData(path="ml-100k\\u.item"):
     movies = pd.read_csv(path, sep='|',
                          header=None, encoding='latin1', names=movie_header)
     movies["release_date"] = movies["release_date"].map(
-        lambda x: x[-4:] if type(x)==str else x)
+        lambda x: x[-4:] if type(x) == str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
         columns=['video_release_date', "title", "IMDb_URL"])
@@ -58,6 +58,7 @@ def readUserData(path="ml-100k\\u.user"):
                                    0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8])
     return users
 
+
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
     # can specify what we wanna analyze from categ input
@@ -73,17 +74,23 @@ def specifyByItemData(items, ratings, categ):
     item_header = ["item_id"]
     if categ == "year":
         item_header.append("year")
-    if categ == "genres":
+    elif categ == "genres":
+        item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
+                           "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
+    elif categ == "all":
+        item_header.append("year")
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
-        return 0
+        raise Exception(
+            "category can only be strings \"year\", \"genres\" or \"all\"")
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
 
 # TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
 # REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
+
 
 ''' similarities '''
 # TODO - connect the ratings ID to item

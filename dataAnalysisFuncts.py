@@ -9,32 +9,32 @@
 # Best/worst ratings for item categs
 # User relation to item item categs.
 
-Task	                                            Description	        Priority	Taskee
-Individual rating charts 
-for each user category	
+# Task	                                            Description	        Priority	Taskee
+# Individual rating charts 
+# for each user category	
 
-Best/Worst rated movies	
+# Best/Worst rated movies	
 
-Similarities within an item category
+# Similarities within an item category
 
-Similarity within a specific user category 
-based on interest
+# Similarity within a specific user category 
+# based on interest
 
-Similarities within a specific user category
-(age,gender,occupation)	
+# Similarities within a specific user category
+# (age,gender,occupation)	
 
-Genre Frequency over the years
+# Genre Frequency over the years
 
-Controversial movies??	
+# Controversial movies??	
 
-(reserved) Data Preparation
+# (reserved) Data Preparation
 
-Implement the K-N-N algo
+# Implement the K-N-N algo
 
-Visualize the kNN algo
+# Visualize the kNN algo
 
-Accuracy of  model	
+# Accuracy of  model	
 
-Precision of model
+# Precision of model
 
-Error of model			
+# Error of model			
