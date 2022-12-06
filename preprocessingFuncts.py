@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # use this file for functions to read data from the ml- 100k file
 # I just made this to separate data and throw away useless ones
@@ -38,7 +39,7 @@ def readItemData(path="ml-100k\\u.item"):
         lambda x: x[-4:] if type(x)==str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
-        columns=['video_release_date', "title", "IMDb_URL"])
+        columns=['video_release_date', "release_date", "IMDb_URL"])
     movies = movies.rename(columns={"release_date": "year"})
     return movies
 
@@ -51,12 +52,71 @@ def readUserData(path="ml-100k\\u.user"):
     occupation = pd.read_csv("ml-100k\\u.occupation", header=None)
     occupation_list = occupation.values
 
+    
+
     users["gender"].replace(['F', 'M'], [0, 1], inplace=True)
     users["occupation"].replace(occupation_list, list(
         range(0, len(occupation_list))), inplace=True)
-    users["age_category"] = pd.cut(users["age"], bins=[
-                                   0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8])
+    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8 ])
+    #print(users["age_category"])
     return users
+
+
+
+# Best/worst ratings for user categs
+def Unweighteddata():
+    rating=readRatingData()
+    users=readUserData()
+    movies=readItemData()
+    average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
+    average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
+    rating=pd.merge(rating,average_rating_baseonI)
+    rating=pd.merge(rating,users)
+    rating=pd.merge(rating,movies)
+    
+    gendercontainerMax= rating.groupby(["gender"]).max().sort_values(by=["gender"],ascending=True)
+    gendercontainerMin= rating.groupby(["gender"]).min().sort_values(by=["gender"],ascending=True)
+    agegroupMax= rating.groupby("age_category").max().sort_values(by=["age_category"],ascending=True)
+    agegroupMin= rating.groupby("age_category").min().sort_values(by=["age_category"],ascending=True)
+    occupationMax= rating.groupby("occupation").max().sort_values(by=["occupation"],ascending=True)
+    occupationMin= rating.groupby("occupation").min().sort_values(by=["occupation"],ascending=True)
+    holddata=pd.concat([gendercontainerMax,gendercontainerMin,agegroupMax,agegroupMin,occupationMax,occupationMin])
+
+    return(holddata)
+
+def Weighteddata():
+    rating=readRatingData()
+    users=readUserData()
+    movies=readItemData()
+    #print(rating.sort_values(by=["user_id","item_id"],ascending=True))
+    average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
+    average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
+    #print(average_rating_baseonI.sort_values(by=["item_id"],ascending=False))
+    rating=pd.merge(rating,average_rating_baseonI)
+    weight=pd.DataFrame()
+    weight["count"]=rating.groupby(["item_id"])["item_id"].count()
+    weight=weight.reset_index()
+    
+    filter=(weight["count"]>=30)
+    weight=weight[filter]
+    rating=pd.merge(rating,weight).sort_values(by=["count"],ascending=True)
+    rating=pd.merge(rating,users)
+    rating=pd.merge(rating,movies)
+
+    gendercontainerMax= rating.groupby(["gender"]).max().sort_values(by=["gender"],ascending=True)
+    gendercontainerMin= rating.groupby(["gender"]).min().sort_values(by=["gender"],ascending=True)
+    agegroupMax= rating.groupby("age_category").max().sort_values(by=["age_category"],ascending=True)
+    agegroupMin= rating.groupby("age_category").min().sort_values(by=["age_category"],ascending=True)
+    occupationMax= rating.groupby("occupation").max().sort_values(by=["occupation"],ascending=True)
+    occupationMin= rating.groupby("occupation").min().sort_values(by=["occupation"],ascending=True)
+    holddata=pd.concat([gendercontainerMax,gendercontainerMin,agegroupMax,agegroupMin,occupationMax,occupationMin])
+
+    print(occupationMax)
+    return holddata
+#Unweighteddata()
+Weighteddata()
+    
+
 
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
