@@ -84,7 +84,7 @@ def Unweighteddata():
 
     return(holddata)
 
-def Weighteddata():
+def Weighteddata(threshold, categ):
     rating=readRatingData()
     users=readUserData()
     movies=readItemData()
@@ -97,24 +97,55 @@ def Weighteddata():
     weight["count"]=rating.groupby(["item_id"])["item_id"].count()
     weight=weight.reset_index()
     
-    filter=(weight["count"]>=30)
+    filter=(weight["count"]>=threshold)
     weight=weight[filter]
     rating=pd.merge(rating,weight).sort_values(by=["count"],ascending=True)
-    rating=pd.merge(rating,users)
-    rating=pd.merge(rating,movies)
-
-    gendercontainerMax= rating.groupby(["gender"]).max().sort_values(by=["gender"],ascending=True)
-    gendercontainerMin= rating.groupby(["gender"]).min().sort_values(by=["gender"],ascending=True)
-    agegroupMax= rating.groupby("age_category").max().sort_values(by=["age_category"],ascending=True)
-    agegroupMin= rating.groupby("age_category").min().sort_values(by=["age_category"],ascending=True)
-    occupationMax= rating.groupby("occupation").max().sort_values(by=["occupation"],ascending=True)
-    occupationMin= rating.groupby("occupation").min().sort_values(by=["occupation"],ascending=True)
-    holddata=pd.concat([gendercontainerMax,gendercontainerMin,agegroupMax,agegroupMin,occupationMax,occupationMin])
-
-    print(occupationMax)
-    return holddata
-#Unweighteddata()
-Weighteddata()
+    rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
+    rating=pd.merge(rating,movies[["item_id","title"]])
+    rating=rating.drop(["user_id","rating","count"],axis=1)
+    #print(rating)
+    parameterMax=0
+    parameterMin=0
+    if categ=="gender":
+    ######################Gender######################
+        for a in range(2):
+            parameterMax=rating[rating["gender"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["gender"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Gender {a}:")
+            print(parameterMax)
+            print(parameterMin)
+    ##################################################
+    elif categ=="occupation":
+    ######################occupation##################
+        a=0
+        for a in range(21):
+            parameterMax=rating[rating["occupation"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["occupation"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Occupation {a}:")
+            print(parameterMax)
+            print(parameterMin)
+    ##################################################
+    elif categ=="age_group":
+    ######################Age_group###################
+        a=0
+        for a in range(9):
+            parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Age_group {a}:")
+            print(parameterMax)
+            print(parameterMin)
+        else:
+            raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
+    ##################################################
+    #print(gendercontainerMax)
+    return parameterMax, parameterMin
+Weighteddata(30,"gender")
     
 
 
@@ -133,11 +164,11 @@ def specifyByItemData(items, ratings, categ):
     item_header = ["item_id"]
     if categ == "year":
         item_header.append("year")
-    if categ == "genres":
+    elif categ == "genres":
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
-        return 0
+        raise Exception(f"categ should be 'year' or 'genre'; given {categ}")
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
