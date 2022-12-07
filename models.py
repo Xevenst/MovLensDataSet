@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 
 class ItemBasedCF:
   '''
-    TODO - WRITE CLASS INFO HERE
-
     Constants :
       k-neighbors
       threshold
