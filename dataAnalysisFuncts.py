@@ -37,5 +37,4 @@
 
 # Precision of model
 
-Error of model		
 # Error of model			

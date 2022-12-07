@@ -36,7 +36,7 @@ def readItemData(path="ml-100k\\u.item"):
     movies = pd.read_csv(path, sep='|',
                          header=None, encoding='latin1', names=movie_header)
     movies["release_date"] = movies["release_date"].map(
-        lambda x: x[-4:] if type(x)==str else x)
+        lambda x: x[-4:] if type(x) == str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
         columns=['video_release_date', "release_date", "IMDb_URL"])
@@ -167,14 +167,20 @@ def specifyByItemData(items, ratings, categ):
     elif categ == "genres":
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
+    elif categ == "all":
+        item_header.append("year")
+        item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
+                           "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
-        raise Exception(f"categ should be 'year' or 'genre'; given {categ}")
+        raise Exception(
+            "category can only be strings \"year\", \"genres\" or \"all\"")
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
 
 # TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
 # REMEMBER GUYS, read table from html in pandas exist. no need for awesome webcrawling acrobatics
+
 
 ''' similarities '''
 # TODO - connect the ratings ID to item
