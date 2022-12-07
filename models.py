@@ -5,7 +5,7 @@ from sklearn import neighbors
 from sklearn.model_selection import train_test_split, cross_val_score
 import matplotlib.pyplot as plt
 
-class ItemBasedCF:
+class CF:
   '''
     Constants :
       k-neighbors
@@ -18,10 +18,15 @@ class ItemBasedCF:
       Similarity Matrix
   '''
 
-  def __init__(self,k=5,threshold=30,metric="pearson") -> None:
+  def __init__(self,base,k=5,threshold=30,metric="pearson") -> None:
     if (metric != 'pearson' and metric!= 'kendall' and metric != 'jaccard'):
       raise Exception(f"metric can only be 'pearson', 'kendall' or 'jaccard'; was given {metric}")
+    if (base != 'item' and base!='user'):
+      raise Exception(
+          f"base can only be 'item' or 'user'; was given {base}")
     self.k = k
+    self.base = 'user_id' if base == 'user' else 'item_id'
+    self.not_base = 'user_id' if base != 'user' else 'item_id'
     self.threshold = threshold
     self.metric = metric
     self.dataDF = 0
@@ -39,7 +44,7 @@ class ItemBasedCF:
       self.dataDF = ratingData
     
     tempDataMatrix = self.dataDF.pivot_table(
-        index='user_id', columns='item_id', values='rating')
+        index=self.not_base, columns=self.base, values='rating')
     tempDataMatrix = tempDataMatrix.set_axis(
       [int(x) for x in tempDataMatrix.columns], axis='columns', inplace=False)
     tempDataMatrix = tempDataMatrix.set_axis(
@@ -51,16 +56,16 @@ class ItemBasedCF:
   def predict(self, x):
     y = []
     for _x in x.values:
-      uID, iID = _x[0], _x[1]
+      notBaseID, baseID = _x[0], _x[1]
       try:
-        simItemIds = self.simMatrix.loc[:,iID].sort_values(ascending=False)
+        simItemIds = self.simMatrix.loc[:,baseID].sort_values(ascending=False)
       except:
         # TODO - figure out how to get unrated movie's sim
         # This try except is made because movie 1582 has never been rated before
         y.append(0)
         continue
 
-      simItemIds = simItemIds.drop(iID).to_frame().dropna().reset_index().set_axis(['item_id','corr'],axis='columns')
+      simItemIds = simItemIds.drop(baseID).to_frame().dropna().reset_index().set_axis([self.base,'corr'],axis='columns')
       
       if (len(simItemIds.index)==0):
         y.append(0)
@@ -71,9 +76,11 @@ class ItemBasedCF:
       _idx = 0
 
       while _k>0 and _idx<len(simItemIds.index):
-        if(not pd.isna(self.dataMatrix.loc[uID,simItemIds.loc[_idx,'item_id']])):
-          a+=simItemIds.loc[_idx,'corr']*self.dataMatrix.loc[uID,simItemIds.loc[_idx,'item_id']]
-          b+=simItemIds.loc[_idx,'corr']
+        if(not pd.isna(self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]])):
+          tempA = simItemIds.loc[_idx,'corr']*self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]
+          tempB = simItemIds.loc[_idx,'corr']
+          a+=tempA
+          b+=tempB
           _k-=1
         _idx += 1
       try:
@@ -85,6 +92,7 @@ class ItemBasedCF:
       except:
         _y = 0
       y.append(_y)
+    print(y)
     return y
 
 
