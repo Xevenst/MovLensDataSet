@@ -58,7 +58,7 @@ def readUserData(path="ml-100k\\u.user"):
     users["gender"].replace(['F', 'M'], [0, 1], inplace=True)
     users["occupation"].replace(occupation_list, list(
         range(0, len(occupation_list))), inplace=True)
-    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8 ])
+    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[0,1,2,3,4,5,6,7])
     #print(users["age_category"])
     return users
 
