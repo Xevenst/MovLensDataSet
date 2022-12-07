@@ -40,7 +40,7 @@ def readItemData(path="ml-100k\\u.item"):
         lambda x: x[-4:] if type(x) == str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
-        columns=['video_release_date', "release_date", "IMDb_URL"])
+        columns=['video_release_date', "IMDb_URL"])#changed release date to 'k, cause you're changing release date to year, and if it's dropped then we cannot change, hence program doesn't work
     movies = movies.rename(columns={"release_date": "year"})
     return movies
 
@@ -288,6 +288,8 @@ def specifyByItemData(items, ratings, categ):
     else:
         raise Exception(
             "category can only be strings \"year\", \"genres\" or \"all\"")
+    # print(item_header)
+    # display(items)
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
