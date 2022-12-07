@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # use this file for functions to read data from the ml- 100k file
 # I just made this to separate data and throw away useless ones
@@ -21,42 +22,132 @@ u.genre is to accompany u.item
 # first, read the rating data
 
 
-def readRatingData():
+def readRatingData(path="ml-100k\\u.data"):
     rating_header = ["user_id", "item_id", "rating", "timestamp"]
-    rating = pd.read_csv("ml-100k\\u.data", sep='\t',
+    rating = pd.read_csv(path, sep='\t',
                          header=None, names=rating_header)
     rating = rating.drop(['timestamp'], axis=1)
     return rating
 
 
-def readItemData():
+def readItemData(path="ml-100k\\u.item"):
     movie_header = ["item_id", "title", "release_date", "video_release_date", "IMDb_URL", "unknown", "Action", "Adventure", "Animation", "Children's",
                     "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
-    movies = pd.read_csv("ml-100k\\u.item", sep='|',
+    movies = pd.read_csv(path, sep='|',
                          header=None, encoding='latin1', names=movie_header)
     movies["release_date"] = movies["release_date"].map(
         lambda x: x[-4:] if type(x)==str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
-        columns=['video_release_date', "title", "IMDb_URL"])
+        columns=['video_release_date', "release_date", "IMDb_URL"])
     movies = movies.rename(columns={"release_date": "year"})
     return movies
 
 
-def readUserData():
+def readUserData(path="ml-100k\\u.user"):
     user_header = ["user_id", "age", "gender", "occupation", "zip_code"]
-    users = pd.read_csv("ml-100k\\u.user", sep='|',
+    users = pd.read_csv(path, sep='|',
                         header=None, names=user_header)
 
     occupation = pd.read_csv("ml-100k\\u.occupation", header=None)
     occupation_list = occupation.values
 
+    
+
     users["gender"].replace(['F', 'M'], [0, 1], inplace=True)
     users["occupation"].replace(occupation_list, list(
         range(0, len(occupation_list))), inplace=True)
-    users["age_category"] = pd.cut(users["age"], bins=[
-                                   0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8])
+    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8 ])
+    #print(users["age_category"])
     return users
+
+
+
+# Best/worst ratings for user categs
+def Unweighteddata():
+    rating=readRatingData()
+    users=readUserData()
+    movies=readItemData()
+    average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
+    average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
+    rating=pd.merge(rating,average_rating_baseonI)
+    rating=pd.merge(rating,users)
+    rating=pd.merge(rating,movies)
+    
+    gendercontainerMax= rating.groupby(["gender"]).max().sort_values(by=["gender"],ascending=True)
+    gendercontainerMin= rating.groupby(["gender"]).min().sort_values(by=["gender"],ascending=True)
+    agegroupMax= rating.groupby("age_category").max().sort_values(by=["age_category"],ascending=True)
+    agegroupMin= rating.groupby("age_category").min().sort_values(by=["age_category"],ascending=True)
+    occupationMax= rating.groupby("occupation").max().sort_values(by=["occupation"],ascending=True)
+    occupationMin= rating.groupby("occupation").min().sort_values(by=["occupation"],ascending=True)
+    holddata=pd.concat([gendercontainerMax,gendercontainerMin,agegroupMax,agegroupMin,occupationMax,occupationMin])
+
+    return(holddata)
+
+def Weighteddata(threshold, categ):
+    rating=readRatingData()
+    users=readUserData()
+    movies=readItemData()
+    #print(rating.sort_values(by=["user_id","item_id"],ascending=True))
+    average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
+    average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
+    #print(average_rating_baseonI.sort_values(by=["item_id"],ascending=False))
+    rating=pd.merge(rating,average_rating_baseonI)
+    weight=pd.DataFrame()
+    weight["count"]=rating.groupby(["item_id"])["item_id"].count()
+    weight=weight.reset_index()
+    
+    filter=(weight["count"]>=threshold)
+    weight=weight[filter]
+    rating=pd.merge(rating,weight).sort_values(by=["count"],ascending=True)
+    rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
+    rating=pd.merge(rating,movies[["item_id","title"]])
+    rating=rating.drop(["user_id","rating","count"],axis=1)
+    #print(rating)
+    parameterMax=0
+    parameterMin=0
+    if categ=="gender":
+    ######################Gender######################
+        for a in range(2):
+            parameterMax=rating[rating["gender"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["gender"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Gender {a}:")
+            print(parameterMax)
+            print(parameterMin)
+    ##################################################
+    elif categ=="occupation":
+    ######################occupation##################
+        a=0
+        for a in range(21):
+            parameterMax=rating[rating["occupation"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["occupation"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Occupation {a}:")
+            print(parameterMax)
+            print(parameterMin)
+    ##################################################
+    elif categ=="age_group":
+    ######################Age_group###################
+        a=0
+        for a in range(9):
+            parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
+            parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
+            parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
+            parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            print(f"Age_group {a}:")
+            print(parameterMax)
+            print(parameterMin)
+        else:
+            raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
+    ##################################################
+    #print(gendercontainerMax)
+    return parameterMax, parameterMin
+Weighteddata(30,"gender")
+    
+
 
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
@@ -77,7 +168,7 @@ def specifyByItemData(items, ratings, categ):
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
-        return 0
+        raise Exception(f"categ should be 'year' or 'genre'; given {categ}")
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
