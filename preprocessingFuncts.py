@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from IPython.display import display, HTML
 
 # use this file for functions to read data from the ml- 100k file
@@ -63,6 +64,27 @@ def readUserData(path="ml-100k\\u.user"):
     return users
 
 
+def getOccupationList(path="ml-100k\\u.occupation"):
+    occupation_header = ["occupation"]
+    rating = pd.read_csv(path,names=occupation_header)
+    return rating
+
+def categorySimilarity(occup,tick,string,size=(20,20),threshold=30):
+    sim = occup.pivot_table(columns=string,index='item_id',values='rating').fillna(0) #Get the pivot table
+    a = sim.corr(min_periods=threshold) #Get the correlation with threshold 30
+    plt.figure(figsize=size) #figure the size, default = 20,20, we can set it based on what we like
+    plt.set_cmap('jet') #Set the color of the box
+    plt.imshow(a) #Create the matrix table
+    plt.colorbar() #Show the right side color
+    plt.xticks(range(0,len(tick)),tick,rotation=-90) 
+    plt.yticks(range(0,len(tick)),tick)
+    if(string != 'year'):
+        for i in a.columns:
+            for j in a.columns:
+                pass
+                # plt.annotate(xy=(i,j),text=str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
+                plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
+    plt.show() #show the plot
 
 # Best/worst ratings for user categs
 def Unweighteduserdata(categ):
@@ -256,12 +278,6 @@ def Unweighteditemdata(moviegenre):
         raise Exception("rewrite the genre")
     return final
 
-
-
-    
-
-
-
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
     # can specify what we wanna analyze from categ input
@@ -270,7 +286,6 @@ def specifyByUserData(users, ratings, categ):
     _user = users.loc[:, user_header]
     df = pd.merge(_user, ratings, on=['user_id'])
     return df
-
 
 def specifyByItemData(items, ratings, categ):
     # categ only 2, genres or year
