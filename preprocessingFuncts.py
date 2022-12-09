@@ -72,7 +72,7 @@ def Unweighteduserdata(categ):
     average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
     average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
     rating=pd.merge(rating,average_rating_baseonI)
-
+    print(rating.sort_values("average_rating",ascending=False))
     rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
     rating=pd.merge(rating,movies[["item_id","title"]])
     rating=rating.drop(["user_id","rating"],axis=1)
@@ -122,7 +122,7 @@ def Unweighteduserdata(categ):
     ##################################################
     return storedparameter
 
-#Unweighteduserdata("age_group")
+Unweighteduserdata("age_group")
 
 def Weighteduserdata(threshold, categ):
     rating=readRatingData()
@@ -138,6 +138,7 @@ def Weighteduserdata(threshold, categ):
     filter=(weight["count"]>=threshold)
     weight=weight[filter]
     rating=pd.merge(rating,weight).sort_values(by=["count"],ascending=True)
+    print(rating.sort_values("average_rating",ascending=False))
     rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
     rating=pd.merge(rating,movies[["item_id","title"]])
     rating=rating.drop(["user_id","rating","count"],axis=1)
