@@ -107,7 +107,7 @@ def Unweighteduserdata(categ):
     elif categ=="age_group":
     ######################Age_group###################
         a=1
-        for a in range(1,9):
+        for a in range(8):
             parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
@@ -173,7 +173,7 @@ def Weighteduserdata(threshold, categ):
     ##################################################
     elif categ=="age_group":
     ######################Age_group###################
-        for a in range(1,9):
+        for a in range(8):
             parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
@@ -210,17 +210,25 @@ def Weighteditemdata(threshold,moviegenre):
     final=[]
     if moviegenre in moviedict:
         if moviegenre == "unknown":
-            return print("Weighted data for Unknown genre does not exist")
+            final=1
+            #return print("Weighted data for Unknown genre does not exist")
+            
         else:
             testmax=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             testmax=testmax[["item_id","title"]]
-            final.append(testmax)
+            
             testmin=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=True).head()
             testmin=testmin[["item_id","title"]]
+            testmax=testmax.style.set_caption(f"{moviegenre} Max:")
+            testmin=testmin.style.set_caption(f"{moviegenre} Min:")
+            final.append(testmax)
             final.append(testmin)
     else:
         raise Exception("rewrite the genre")
-    return final
+    if moviegenre== "unknown":
+        return print("Weighted data for Unknown genre does not exist")
+    else:
+        return final
 
 def Unweighteditemdata(moviegenre):
     rating=readRatingData()
@@ -236,16 +244,16 @@ def Unweighteditemdata(moviegenre):
     if moviegenre in moviedict:
             testmax=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             testmax=testmax[["item_id","title"]]
-            final.append(testmax)
+            
             testmin=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=True).head()
             testmin=testmin[["item_id","title"]]
+            testmax=testmax.style.set_caption(f"{moviegenre} Max:")
+            testmin=testmin.style.set_caption(f"{moviegenre} Min:")
+            final.append(testmax)
             final.append(testmin)
     else:
         raise Exception("rewrite the genre")
     return final
-
-#Unweighteditemdata("unknown")
-#Weighteditemdata(30,"Horror")
 
 
 
