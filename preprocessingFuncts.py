@@ -44,7 +44,20 @@ def readItemData(path="ml-100k\\u.item"):
         columns=['video_release_date', "IMDb_URL"])#changed release date to 'k, cause you're changing release date to year, and if it's dropped then we cannot change, hence program doesn't work
     movies = movies.rename(columns={"release_date": "year"})
     return movies
+#readItemData()
 
+def yearcateg():
+     movies= readItemData()
+     movies= movies[["item_id", "title","year"]]
+     print(movies)
+     count=pd.DataFrame()
+     count["count"]=movies.groupby(["year"])["year"].count()
+     count=count.reset_index()
+     movies=pd.merge(movies,count)
+     movies["year"]=pd.to_numeric(movies["year"])
+     movies["year_category"]=pd.cut(movies["year"],bins=[0,1930,1940,1950,1960,1970,1980,1990,2000], labels=[1920,1930,1940,1950,1960,1970,1980,1990])
+     return movies
+yearcateg()
 
 def readUserData(path="ml-100k\\u.user"):
     user_header = ["user_id", "age", "gender", "occupation", "zip_code"]
@@ -144,7 +157,7 @@ def Unweighteduserdata(categ):
     ##################################################
     return storedparameter
 
-Unweighteduserdata("age_group")
+#Unweighteduserdata("age_group")
 
 def Weighteduserdata(threshold, categ):
     rating=readRatingData()
@@ -211,7 +224,7 @@ def Weighteduserdata(threshold, categ):
     #print(storedparameter)
 
     return storedparameter
-Weighteduserdata(30,"gender")
+#Weighteduserdata(30,"gender")
 # Unweighteduserdata("age_group")
 
 def Weighteditemdata(threshold,moviegenre):
