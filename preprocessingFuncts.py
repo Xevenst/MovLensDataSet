@@ -86,8 +86,8 @@ def getOccupationList(path="ml-100k\\u.occupation"):
     rating = pd.read_csv(path,names=occupation_header)
     return rating
 
-def categorySimilarity(occup,tick,string,size=(20,20),threshold=30):
-    sim = occup.pivot_table(columns=string,index='item_id',values='rating').fillna(0) #Get the pivot table
+def categorySimilarity(occup,tick,string,size=(20,20),threshold=30,setindex='item_id'):
+    sim = occup.pivot_table(columns=string,index=setindex,values='rating').fillna(0) #Get the pivot table
     a = sim.corr(min_periods=threshold) #Get the correlation with threshold 30
     plt.figure(figsize=size) #figure the size, default = 20,20, we can set it based on what we like
     plt.set_cmap('jet') #Set the color of the box
@@ -102,6 +102,7 @@ def categorySimilarity(occup,tick,string,size=(20,20),threshold=30):
                 # plt.annotate(xy=(i,j),text=str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
                 plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
     plt.show() #show the plot
+    return sim
 
 # Best/worst ratings for user categs
 def Unweighteduserdata(categ):
@@ -309,11 +310,16 @@ def specifyByItemData(items, ratings, categ):
     item_header = ["item_id"]
     if categ == "year":
         item_header.append("year")
+    
+    elif categ=="year_category":
+        item_header.append("year_category")
+
     elif categ == "genres":
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     elif categ == "all":
         item_header.append("year")
+        item_header.append("year_category")
         item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
                            "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
     else:
