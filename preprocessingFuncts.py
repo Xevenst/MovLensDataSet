@@ -43,13 +43,17 @@ def readItemData(path="ml-100k\\u.item"):
     movies = movies.drop(
         columns=['video_release_date', "IMDb_URL"])#changed release date to 'k, cause you're changing release date to year, and if it's dropped then we cannot change, hence program doesn't work
     movies = movies.rename(columns={"release_date": "year"})
+    # temp = movies.copy()
+    # temp['movies'] = pd.to_numeric(temp[""])
+    movies["year"] = pd.to_numeric(movies["year"])
+    movies["year_category"] = pd.cut(movies["year"], bins=[0, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000], labels=[0, 1, 2, 3, 4, 5, 6, 7])
     return movies
-#readItemData()
+# readItemData()
 
 def yearcateg():
      movies= readItemData()
      movies= movies[["item_id", "title","year"]]
-     print(movies)
+    #  print(movies)
      count=pd.DataFrame()
      count["count"]=movies.groupby(["year"])["year"].count()
      count=count.reset_index()
@@ -57,7 +61,7 @@ def yearcateg():
      movies["year"]=pd.to_numeric(movies["year"])
      movies["year_category"]=pd.cut(movies["year"],bins=[0,1930,1940,1950,1960,1970,1980,1990,2000], labels=[1920,1930,1940,1950,1960,1970,1980,1990])
      return movies
-yearcateg()
+# yearcateg()
 
 def readUserData(path="ml-100k\\u.user"):
     user_header = ["user_id", "age", "gender", "occupation", "zip_code"]
