@@ -102,6 +102,7 @@ def categorySimilarity(occup,tick,string,size=(20,20),threshold=30,setindex='ite
                 # plt.annotate(xy=(i,j),text=str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
                 plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
     plt.show() #show the plot
+    return sim
 
 # Best/worst ratings for user categs
 def Unweighteduserdata(categ):
