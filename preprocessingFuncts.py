@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from IPython.display import display, HTML
 
 # use this file for functions to read data from the ml- 100k file
@@ -40,10 +41,23 @@ def readItemData(path="ml-100k\\u.item"):
         lambda x: x[-4:] if type(x) == str else x)
     # the only columns that matter is just id and genres hahahaah
     movies = movies.drop(
-        columns=['video_release_date', "release_date", "IMDb_URL"])
+        columns=['video_release_date', "IMDb_URL"])#changed release date to 'k, cause you're changing release date to year, and if it's dropped then we cannot change, hence program doesn't work
     movies = movies.rename(columns={"release_date": "year"})
     return movies
+#readItemData()
 
+def yearcateg():
+     movies= readItemData()
+     movies= movies[["item_id", "title","year"]]
+     print(movies)
+     count=pd.DataFrame()
+     count["count"]=movies.groupby(["year"])["year"].count()
+     count=count.reset_index()
+     movies=pd.merge(movies,count)
+     movies["year"]=pd.to_numeric(movies["year"])
+     movies["year_category"]=pd.cut(movies["year"],bins=[0,1930,1940,1950,1960,1970,1980,1990,2000], labels=[1920,1930,1940,1950,1960,1970,1980,1990])
+     return movies
+yearcateg()
 
 def readUserData(path="ml-100k\\u.user"):
     user_header = ["user_id", "age", "gender", "occupation", "zip_code"]
@@ -58,11 +72,32 @@ def readUserData(path="ml-100k\\u.user"):
     users["gender"].replace(['F', 'M'], [0, 1], inplace=True)
     users["occupation"].replace(occupation_list, list(
         range(0, len(occupation_list))), inplace=True)
-    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[1, 2, 3, 4, 5, 6, 7, 8 ])
+    users["age_category"] = pd.cut(users["age"], bins = [0, 10, 20, 30, 40, 50, 60, 70, 80], labels=[0,1,2,3,4,5,6,7])
     #print(users["age_category"])
     return users
 
 
+def getOccupationList(path="ml-100k\\u.occupation"):
+    occupation_header = ["occupation"]
+    rating = pd.read_csv(path,names=occupation_header)
+    return rating
+
+def categorySimilarity(occup,tick,string,size=(20,20),threshold=30):
+    sim = occup.pivot_table(columns=string,index='item_id',values='rating').fillna(0) #Get the pivot table
+    a = sim.corr(min_periods=threshold) #Get the correlation with threshold 30
+    plt.figure(figsize=size) #figure the size, default = 20,20, we can set it based on what we like
+    plt.set_cmap('jet') #Set the color of the box
+    plt.imshow(a) #Create the matrix table
+    plt.colorbar() #Show the right side color
+    plt.xticks(range(0,len(tick)),tick,rotation=-90) 
+    plt.yticks(range(0,len(tick)),tick)
+    if(string != 'year'):
+        for i in a.columns:
+            for j in a.columns:
+                pass
+                # plt.annotate(xy=(i,j),text=str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
+                plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
+    plt.show() #show the plot
 
 # Best/worst ratings for user categs
 def Unweighteduserdata(categ):
@@ -72,7 +107,7 @@ def Unweighteduserdata(categ):
     average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
     average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
     rating=pd.merge(rating,average_rating_baseonI)
-
+    print(rating.sort_values("average_rating",ascending=False))
     rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
     rating=pd.merge(rating,movies[["item_id","title"]])
     rating=rating.drop(["user_id","rating"],axis=1)
@@ -84,12 +119,11 @@ def Unweighteduserdata(categ):
             parameterMin=rating[rating["gender"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Gender {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Gender {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            #print(f"Gender {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
-            # display(storedparameter)
+
     ##################################################
     elif categ=="occupation":
     ######################occupation##################
@@ -99,42 +133,38 @@ def Unweighteduserdata(categ):
             parameterMin=rating[rating["occupation"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Occupation {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Occupation {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            # print(f"Occupation {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
+
     ##################################################
     elif categ=="age_group":
     ######################Age_group###################
-        a=0
-        for a in range(9):
+        a=1
+        for a in range(8):
             parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Age Group {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Age Group {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            # print(f"Age_group {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
-        else:
-            raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
+
+    else:
+         raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
     ##################################################
-    #print(gendercontainerMax)
-    #print(storedparameter)
     return storedparameter
 
-
+#Unweighteduserdata("age_group")
 
 def Weighteduserdata(threshold, categ):
     rating=readRatingData()
     users=readUserData()
     movies=readItemData()
-    #print(rating.sort_values(by=["user_id","item_id"],ascending=True))
     average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
     average_rating_baseonI.rename(columns = {'rating':'average_rating'}, inplace = True)
-    #print(average_rating_baseonI.sort_values(by=["item_id"],ascending=False))
     rating=pd.merge(rating,average_rating_baseonI)
     weight=pd.DataFrame()
     weight["count"]=rating.groupby(["item_id"])["item_id"].count()
@@ -143,6 +173,7 @@ def Weighteduserdata(threshold, categ):
     filter=(weight["count"]>=threshold)
     weight=weight[filter]
     rating=pd.merge(rating,weight).sort_values(by=["count"],ascending=True)
+    print(rating.sort_values("average_rating",ascending=False))
     rating=pd.merge(rating,users[["user_id","gender","occupation","age_category"]])
     rating=pd.merge(rating,movies[["item_id","title"]])
     rating=rating.drop(["user_id","rating","count"],axis=1)
@@ -157,13 +188,11 @@ def Weighteduserdata(threshold, categ):
             parameterMin=rating[rating["gender"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Gender {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Gender {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            
-            #print(f"Gender {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
-            # display(storedparameter)
+
     ##################################################
     elif categ=="occupation":
     ######################occupation##################
@@ -173,33 +202,30 @@ def Weighteduserdata(threshold, categ):
             parameterMin=rating[rating["occupation"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Occupation {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Occupation {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            # print(f"Occupation {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
     ##################################################
     elif categ=="age_group":
     ######################Age_group###################
-        a=0
-        for a in range(9):
+        for a in range(8):
             parameterMax=rating[rating["age_category"]==a].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             parameterMin=rating[rating["age_category"]==a].groupby("average_rating").min().sort_values("average_rating",ascending=True).head()
             parameterMax=parameterMax.drop(["gender","occupation","age_category"],axis=1)
             parameterMin=parameterMin.drop(["gender","occupation","age_category"],axis=1)
+            parameterMax=parameterMax.style.set_caption(f"Age group {a} Max:")
+            parameterMin=parameterMin.style.set_caption(f"Age group {a} Min:")
             storedparameter.append(parameterMax)
             storedparameter.append(parameterMin)
-            # print(f"Age_group {a}:")
-            # display(parameterMax)
-            # display(parameterMin)
-        else:
-            raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
+    else:
+         raise Exception(f"categ should be 'gender' or 'occupation' or 'age_group'; given {categ}")
     ##################################################
-    #print(gendercontainerMax)
     #print(storedparameter)
+
     return storedparameter
 #Weighteduserdata(30,"gender")
-#Unweighteduserdata("gender")
+# Unweighteduserdata("age_group")
 
 def Weighteditemdata(threshold,moviegenre):
     rating=readRatingData()
@@ -220,17 +246,25 @@ def Weighteditemdata(threshold,moviegenre):
     final=[]
     if moviegenre in moviedict:
         if moviegenre == "unknown":
-            raise Exception("Weighted data for Unknown genre does not exist")
+            final=1
+            #return print("Weighted data for Unknown genre does not exist")
+            
         else:
             testmax=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             testmax=testmax[["item_id","title"]]
-            final.append(testmax)
+            
             testmin=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=True).head()
             testmin=testmin[["item_id","title"]]
+            testmax=testmax.style.set_caption(f"{moviegenre} Max:")
+            testmin=testmin.style.set_caption(f"{moviegenre} Min:")
+            final.append(testmax)
             final.append(testmin)
     else:
         raise Exception("rewrite the genre")
-    return final
+    if moviegenre== "unknown":
+        return print("Weighted data for Unknown genre does not exist")
+    else:
+        return final
 
 def Unweighteditemdata(moviegenre):
     rating=readRatingData()
@@ -246,22 +280,16 @@ def Unweighteditemdata(moviegenre):
     if moviegenre in moviedict:
             testmax=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=False).head()
             testmax=testmax[["item_id","title"]]
-            final.append(testmax)
+            
             testmin=rating[rating[moviegenre]==1].groupby("average_rating").max().sort_values("average_rating",ascending=True).head()
             testmin=testmin[["item_id","title"]]
+            testmax=testmax.style.set_caption(f"{moviegenre} Max:")
+            testmin=testmin.style.set_caption(f"{moviegenre} Min:")
+            final.append(testmax)
             final.append(testmin)
     else:
         raise Exception("rewrite the genre")
     return final
-
-#Unweighteditemdata("unknown")
-#Weighteditemdata(30,"Horror")
-
-
-
-    
-
-
 
 def specifyByUserData(users, ratings, categ):
     # user based can be classified by "age", "gender", "occupation", "zip_code"
@@ -271,7 +299,6 @@ def specifyByUserData(users, ratings, categ):
     _user = users.loc[:, user_header]
     df = pd.merge(_user, ratings, on=['user_id'])
     return df
-
 
 def specifyByItemData(items, ratings, categ):
     # categ only 2, genres or year
@@ -288,6 +315,8 @@ def specifyByItemData(items, ratings, categ):
     else:
         raise Exception(
             "category can only be strings \"year\", \"genres\" or \"all\"")
+    # print(item_header)
+    # display(items)
     _item = items.loc[:, item_header]
     df = pd.merge(_item, ratings, on=['item_id'])
     return df
