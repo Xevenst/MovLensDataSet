@@ -57,8 +57,18 @@ class CF:
   
   def predict(self, x):
     y = []
+    # print(x.columns)
+    # print()
     for _x in x.values:
-      notBaseID, baseID = (_x[0], _x[1]) if self.base=='item' else (_x[1], _x[0])
+      # print(_x)
+      # print(self.base)
+      # raise("debug lol")
+      notBaseID, baseID = 0,0
+      if(self.base == 'item_id'):
+        notBaseID, baseID = _x[0], _x[1]
+      else:
+        notBaseID, baseID = _x[1], _x[0]
+
       try:
         simItemIds = self.simMatrix.loc[:,baseID].sort_values(ascending=False)
       except:
@@ -66,9 +76,7 @@ class CF:
         # This try except is made because movie 1582 has never been rated before
         y.append(0)
         continue
-
       simItemIds = simItemIds.drop(baseID).to_frame().dropna().reset_index().set_axis([self.base,'corr'],axis='columns')
-      
       if (len(simItemIds.index)==0):
         y.append(0)
         continue
@@ -78,13 +86,17 @@ class CF:
       _idx = 0
 
       while _k>0 and _idx<len(simItemIds.index):
-        if(not pd.isna(self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]])):
-          tempA = simItemIds.loc[_idx,'corr']*self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]
-          tempB = simItemIds.loc[_idx,'corr']
-          a+=tempA
-          b+=tempB
-          _k-=1
-        _idx += 1
+        try:
+          # Because of missing movie 1582
+          if(not pd.isna(self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]])):
+            tempA = simItemIds.loc[_idx,'corr']*self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]
+            tempB = simItemIds.loc[_idx,'corr']
+            a+=tempA
+            b+=tempB
+            _k-=1
+          _idx += 1
+        except:
+          break
       try:
         #TODO - fix bug. for some reason some movies' ratings are -10,
         # some others are 6. So bad loll
