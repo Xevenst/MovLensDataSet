@@ -86,6 +86,19 @@ def getOccupationList(path="ml-100k\\u.occupation"):
     rating = pd.read_csv(path,names=occupation_header)
     return rating
 
+def getGenreList(pathitem="ml-100k\\u.item",pathgenre="ml-100k\\u.genre"):
+    movie_header = ["item_id", "title", "release_date", "video_release_date", "IMDb_URL",
+         "unknown", "Action", "Adventure", "Animation","Children's", "Comedy", "Crime",
+         "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", 
+         "Romance", "Sci-Fi", "Thriller", "War", "Western"]
+    movies = pd.read_csv(pathitem, sep = '|', header = None, encoding = 'latin1', names = movie_header)
+    movies = movies.drop(columns=['video_release_date'])
+    genre = pd.read_csv(pathgenre, sep = '|', header = None)
+    genre_list = genre[0].values
+    movie_set_genre = movies[genre_list]
+    genre_array = movie_set_genre.to_numpy()
+    return genre_array
+
 def categorySimilarity(occup,tick,string,size=(20,20),threshold=30,setindex='item_id'):
     sim = occup.pivot_table(columns=string,index=setindex,values='rating').fillna(0) #Get the pivot table
     a = sim.corr(min_periods=threshold) #Get the correlation with threshold 30
