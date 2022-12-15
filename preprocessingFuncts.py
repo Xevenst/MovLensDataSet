@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display, HTML
+import sklearn.metrics as metrics
 
 # use this file for functions to read data from the ml- 100k file
 # I just made this to separate data and throw away useless ones
@@ -99,9 +100,11 @@ def getGenreList(pathitem="ml-100k\\u.item",pathgenre="ml-100k\\u.genre"):
     genre_array = movie_set_genre.to_numpy()
     return genre_array
 
-def categorySimilarity(occup,tick,string,size=(20,20),threshold=30,setindex='item_id'):
+def categorySimilarity(occup,tick,string,shown,size=(20,20),threshold=30,setindex='item_id'):
     sim = occup.pivot_table(columns=string,index=setindex,values='rating').fillna(0) #Get the pivot table
     a = sim.corr(min_periods=threshold) #Get the correlation with threshold 30
+    if(shown=='false'):
+        return a
     plt.figure(figsize=size) #figure the size, default = 20,20, we can set it based on what we like
     plt.set_cmap('jet') #Set the color of the box
     plt.imshow(a) #Create the matrix table
@@ -115,7 +118,88 @@ def categorySimilarity(occup,tick,string,size=(20,20),threshold=30,setindex='ite
                 # plt.annotate(xy=(i,j),text=str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
                 plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
     plt.show() #show the plot
-    return sim
+    # return sim
+
+def getEssentials():
+    users = readUserData()
+    users = users.sort_values(by=['user_id','age']).reset_index().drop('index',axis=1)
+
+    items = readItemData()
+    items = items.sort_values(by=['year','item_id']).reset_index().drop('index',axis=1)
+    items = items.dropna()
+
+    ratings = readRatingData()
+    ratings = ratings.sort_values(by=['user_id','item_id']).reset_index().drop('index',axis=1)
+    return users,items,ratings
+
+def getSimOccup(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = specifyByUserData(users, ratings, ["occupation"])
+    job = getOccupationList()
+    occup = occup.drop('user_id',axis=1)
+    occup = occup.groupby(by=['occupation','item_id']).mean()
+    tick = job['occupation'].tolist()
+    return categorySimilarity(occup,tick,'occupation',shown)
+
+def getSimAgeCategory(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = specifyByUserData(users, ratings, ["age_category"])
+    occup = occup.drop('user_id',axis=1)
+    occup = occup.groupby(by=['age_category','item_id']).mean()
+    age = [f"{x*10+1} - {(x+1)*10}" for x in range(0,8)]
+    return categorySimilarity(occup,age,'age_category',shown)
+
+def getSimGender(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = specifyByUserData(users, ratings, ["gender"])
+    occup = occup.drop('user_id',axis=1)
+    occup = occup.groupby(by=['gender','item_id']).mean()
+    gender = ['female','male']
+    return categorySimilarity(occup,gender,'gender',shown,size=(10,10,shown))
+
+def getSimItemYear(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = saveyear = specifyByItemData(items, ratings, "year")
+    occup = occup.drop('user_id',axis=1)
+    occup = occup.groupby(by=['year','item_id']).mean()
+
+    #saving only the year list
+    saveyear = saveyear['year'].drop_duplicates().reset_index().drop('index',axis=1)
+    saveyeartext = saveyear['year'].tolist()
+    return categorySimilarity(occup,saveyeartext,'year',shown,size=(40,40),threshold=0)
+
+def getSimUserYear(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = saveyear = specifyByItemData(items, ratings, "year")
+    occup = occup.drop('item_id',axis=1)
+    occup = occup.groupby(by=['year','user_id']).mean()
+
+    #saving only the year list
+    saveyear = saveyear['year'].drop_duplicates().reset_index().drop('index',axis=1)
+    saveyeartext = saveyear['year'].tolist()
+    return categorySimilarity(occup,saveyeartext,'year',shown,size=(40,40),threshold=0,setindex='user_id')
+
+def getSimUserYearCategory(shown='false'):
+    users,items,ratings = getEssentials()
+    occup = saveyear = specifyByItemData(items, ratings, "year_category")
+    occup = occup.drop('item_id',axis=1)
+    occup = occup.groupby(by=['year_category','user_id']).mean()
+
+    #saving only the year list
+    # saveyear = saveyear['year_category'].drop_duplicates().reset_index().drop('index',axis=1)
+    saveyeartext = ["1920s","1930s","1940s","1950s","1960s","1970s","1980s","1990s"]
+    return categorySimilarity(occup,saveyeartext,'year_category',shown,size=(40,40),threshold=0,setindex='user_id')
+
+def getSimGenre(action="getSim"):
+    genre_array = getGenreList()
+    distance_matrix = metrics.pairwise_distances(genre_array,metric = 'jaccard') # ‘cosine’, ‘euclidean’, etc
+    if(action=="getSim"):
+        return distance_matrix
+    plt.figure(figsize=(40,40))
+    plt.imshow(distance_matrix)
+    plt.set_cmap('jet') #Set the color of the box
+    plt.colorbar() #Show the right side color
+    plt.show()
 
 # Best/worst ratings for user categs
 def Unweighteduserdata(categ):
