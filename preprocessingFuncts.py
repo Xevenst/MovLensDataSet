@@ -315,7 +315,7 @@ def specifyByUserData(users, ratings, categ):
     user_header = ["user_id"]
     user_header.extend(categ)
     _user = users.loc[:, user_header]
-    df = pd.merge(_user, ratings, on=['user_id'])
+    df = pd.merge(ratings, _user, on=['user_id'])
     return df
 
 def specifyByItemData(items, ratings, categ):
@@ -341,7 +341,7 @@ def specifyByItemData(items, ratings, categ):
     # print(item_header)
     # display(items)
     _item = items.loc[:, item_header]
-    df = pd.merge(_item, ratings, on=['item_id'])
+    df = pd.merge(ratings, _item, on=['item_id'])
     return df
 
 # TODO - group zipcodes by this lib from https://www.zipcode.com.ng/2022/06/list-of-5-digit-zip-codes-united-states.html - steven
