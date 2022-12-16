@@ -155,7 +155,7 @@ def getSimGender(shown='false'):
     occup = occup.drop('user_id',axis=1)
     occup = occup.groupby(by=['gender','item_id']).mean()
     gender = ['female','male']
-    return categorySimilarity(occup,gender,'gender',shown,size=(10,10,shown))
+    return categorySimilarity(occup,gender,'gender',shown,size=(10,10))
 
 def getSimItemYear(shown='false'):
     users,items,ratings = getEssentials()
