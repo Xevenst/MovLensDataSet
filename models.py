@@ -295,7 +295,7 @@ class SimCF:
         print(tempDataMatrix)
 
         self.dataMatrix = tempDataMatrix
-        self.simMatrix = self.dataMatrix.corr(min_periods=self.threshold)
+        self.simMatrix = self.dataMatrix.corr(min_periods=self.threshold,method=self.metric)
 
     def predict(self, x):
         y = []
