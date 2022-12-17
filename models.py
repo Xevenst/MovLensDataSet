@@ -5,7 +5,6 @@ import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import dataAnalysisFuncts as DA
 import preprocessingFuncts as pp
 import sklearn.metrics as metrics
 
@@ -234,14 +233,8 @@ class KmeansCF:
         # print(y)
         return y
 
-
-# IBCF = KmeansCF('item')
-# IBCF.fit('ml-100k\\ua.base')
-# testData = pp.readRatingData('ml-100k\\ua.test')
-# testX, testY = testData.loc[:, ['user_id',
-#                                 'item_id']], testData.loc[:, 'rating']
-# predY = IBCF.predict(testX)
-# print(predY)
+class ContentBased:
+  pass
 
 class SimCF:
     '''
