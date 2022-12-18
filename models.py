@@ -199,7 +199,7 @@ class SimCF:
         #print(simItemIds.loc[_idx,self.base])
         if(self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]] != 0):
           #bu dong 
-          # print(f'simItemIds.loc[_idx,corr]: {simItemIds.loc[_idx,"corr"]}, self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]] : {self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]}')
+           print(f'simItemIds.loc[_idx,corr]: {simItemIds.loc[_idx,"corr"]}, self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]] : {self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]}')
           tempA = simItemIds.loc[_idx,'corr']*self.dataMatrix.loc[notBaseID,simItemIds.loc[_idx,self.base]]
           tempB = simItemIds.loc[_idx,'corr']
           a+=tempA
