@@ -280,7 +280,7 @@ class SimCF:
 
         # TODO - do this, but to user_id and item_id, not just for rating
         tempDataMatrix = self.dataDF.pivot_table(
-            index=self.not_base, columns=self.base, values='ratings')
+            index=self.not_base, columns=self.base, values='rating')
         tempDataMatrix = tempDataMatrix.set_axis(
             [int(x) for x in tempDataMatrix.columns], axis='columns', inplace=False)
         tempDataMatrix = tempDataMatrix.set_axis(
@@ -339,5 +339,5 @@ class SimCF:
 
 
 # TODO - Similarity Model for SimCF
-# IBCF = SimCF('item')
-# IBCF.fit('ml-100k\\ua.base')
+IBCF = SimCF('item')
+IBCF.fit('ml-100k\\ua.base')

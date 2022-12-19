@@ -84,8 +84,8 @@ def readUserData(path="ml-100k\\u.user"):
 
 def getOccupationList(path="ml-100k\\u.occupation"):
     occupation_header = ["occupation"]
-    rating = pd.read_csv(path,names=occupation_header)
-    return rating
+    occupation = pd.read_csv(path,names=occupation_header)
+    return occupation
 
 def getGenreList(pathitem="ml-100k\\u.item",pathgenre="ml-100k\\u.genre"):
     movie_header = ["item_id", "title", "release_date", "video_release_date", "IMDb_URL",
