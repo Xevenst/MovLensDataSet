@@ -338,6 +338,6 @@ class SimCF:
         return y
 
 
-# TODO - Similarity Model for SimCF
-IBCF = SimCF('item')
-IBCF.fit('ml-100k\\ua.base')
+# # TODO - Similarity Model for SimCF
+# IBCF = SimCF('item')
+# IBCF.fit('ml-100k\\ua.base')
