@@ -202,7 +202,7 @@ def getSimGenre(action="getSim"):
     plt.show()
 
 # Best/worst ratings for user categs
-def Unweighteduserdata(categ):
+def Unthresholduserdata(categ):
     rating=readRatingData()
     users=readUserData()
     movies=readItemData()
@@ -261,7 +261,7 @@ def Unweighteduserdata(categ):
 
 #Unweighteduserdata("age_group")
 
-def Weighteduserdata(threshold, categ):
+def Thresholduserdata(threshold, categ):
     rating=readRatingData()
     users=readUserData()
     movies=readItemData()
@@ -329,7 +329,7 @@ def Weighteduserdata(threshold, categ):
 #Weighteduserdata(30,"gender")
 # Unweighteduserdata("age_group")
 
-def Weighteditemdata(threshold,moviegenre):
+def Thresholditemdata(threshold,moviegenre):
     rating=readRatingData()
     movies=readItemData()
     average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
@@ -368,7 +368,7 @@ def Weighteditemdata(threshold,moviegenre):
     else:
         return final
 
-def Unweighteditemdata(moviegenre):
+def Unthresholditemdata(moviegenre):
     rating=readRatingData()
     movies=readItemData()
     average_rating_baseonI= rating[["item_id", "rating"]].groupby(["item_id"], as_index=False).mean() # average rating per movie
@@ -435,3 +435,5 @@ def specifyByItemData(items, ratings, categ):
 ''' similarities '''
 # TODO - connect the ratings ID to item
 # TODO - compare user info with genres
+
+
