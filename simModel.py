@@ -52,7 +52,7 @@ class  simiModel:
         except Exception as e:
           # TODO - figure out how to get unrated movie's sim
           # This try except is made because movie 1582 has never been rated before
-          print(e)
+          # print(e)
           y.append(0)
           continue
         simItemIds = simItemIds.drop(baseID).to_frame().dropna().reset_index().set_axis([self.base,'corr'],axis='columns')
@@ -84,10 +84,10 @@ class  simiModel:
           _y = round(a/b) if round(a/b)>0 else 0
           _y = 5 if _y>5 else _y
         except Exception as e:
-          print(e)
+          # print(e)
           _y = 0
         y.append(_y)
-      print(y)
+      # print(y)
       return y
 
     def fit(self,path):

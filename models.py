@@ -51,7 +51,7 @@ class CF:
 
         tempDataMatrix = self.dataDF.pivot_table(
             index=self.not_base, columns=self.base, values='rating')
-        print(tempDataMatrix)
+        # print(tempDataMatrix)
         tempDataMatrix = tempDataMatrix.set_axis(
             [int(x) for x in tempDataMatrix.columns], axis='columns', inplace=False)
         tempDataMatrix = tempDataMatrix.set_axis(
@@ -289,7 +289,7 @@ class SimCF:
             [int(x) for x in tempDataMatrix.columns], axis='columns', inplace=False)
         tempDataMatrix = tempDataMatrix.set_axis(
             [int(x) for x in tempDataMatrix.index], axis='index', inplace=False)
-        print(tempDataMatrix)
+        # print(tempDataMatrix)
 
         self.dataMatrix = tempDataMatrix
         self.simMatrix = self.dataMatrix.corr(min_periods=self.threshold,method=self.metric)
@@ -338,15 +338,15 @@ class SimCF:
             except:
                 _y = 0
             y.append(_y)
-        print(y)
+        # print(y)
         return y
 
 
 # # TODO - Similarity Model for SimCF
-IBCF = CF('user')
-IBCF.fit('ml-100k\\ua.base')
-testData = pp.readRatingData('ml-100k\\ua.test')
-testX, testY =  testData.loc[:,['user_id','item_id']],testData.loc[:,'rating']
+# IBCF = CF('user')
+# IBCF.fit('ml-100k\\ua.base')
+# testData = pp.readRatingData('ml-100k\\ua.test')
+# testX, testY =  testData.loc[:,['user_id','item_id']],testData.loc[:,'rating']
 
-predY = IBCF.predict(testX)
-print(predY)
+# predY = IBCF.predict(testX)
+# print(predY)
