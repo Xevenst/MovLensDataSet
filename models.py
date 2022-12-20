@@ -4,10 +4,11 @@ import preprocessingFuncts as pp
 from sklearn import neighbors
 from sklearn.model_selection import train_test_split, cross_val_score
 from scipy.spatial.distance import pdist, squareform
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import preprocessingFuncts as pp
 import sklearn.metrics as metrics
-
+import random
 
 class CF:
   '''
