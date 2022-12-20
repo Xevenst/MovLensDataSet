@@ -1,61 +1,43 @@
 import preprocessingFuncts as pp
-import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from models import KmeansCF
+from models import CF
+from simModel import simiModel
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.metrics import classification_report
 
-def specifyByItemData(items, ratings, categ):
-    # categ only 2, genres or year
-    item_header = ["item_id"]
-    if categ == "year":
-        item_header.append("year")
-    elif categ == "genres":
-        item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
-                           "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
-    elif categ == "all":
-        item_header.append("year")
-        item_header.extend(["unknown", "Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary",
-                           "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"])
-    else:
-        raise Exception(
-            "category can only be strings \"year\", \"genres\" or \"all\"")
-    # print(item_header)
-    # display(items)
-    _item = items.loc[:, item_header]
-    df = pd.merge(_item, ratings, on=['item_id'])
-    return df
+modelname = ["KmeansCF('user')","CF('user')","CF('item')","simiModel('user')","CategoricalNB()"]
+dicpath=['ml-100k\\u1.base','ml-100k\\u2.base','ml-100k\\u3.base','ml-100k\\u4.base','ml-100k\\u5.base']
+dicpathtest=['ml-100k\\u1.test','ml-100k\\u2.test','ml-100k\\u3.test','ml-100k\\u4.test','ml-100k\\u5.test']
+arravgtrain=[]
+arravgtest=[]
 
-def categorySimilarity(occup,arr,tick,string,size=(20,20)):
-    sim = occup.pivot_table(columns=string,index='item_id',values='rating') #Get the pivot table
-    a = sim.corr(min_periods=30) #Get the correlation with threshold 30
-    plt.figure(figsize=size) #figure the size, default = 20,20, we can set it based on what we like
-    plt.set_cmap('jet') #Set the color of the box
-    plt.imshow(a) #Create the matrix table
-    plt.colorbar() #Show the right side color
-    # print(a)
-    for i in a.columns:
-        # print('a')
-        for j in a.columns:
-            # print(j+" "+i)
-            plt.text(i,j,str(a[j][i].round(2)),va='center',ha='center') #setting the text in each matrix box
-    plt.xticks(range(0,len(tick)),tick,rotation=-90) 
-    plt.yticks(range(0,len(tick)),tick)
-    plt.show() #show the plot
-
-items = pp.readItemData()
-items = items.sort_values(by=['year','item_id']).reset_index().drop('index',axis=1)
-items = items.dropna()
-
-ratings = pp.readRatingData()
-ratings = ratings.sort_values(by=['user_id','item_id']).reset_index().drop('index',axis=1)
-ratings
-
-occup = saveyear = pp.specifyByItemData(items, ratings, "year")
-occup = occup.drop('user_id',axis=1)
-occup = occup.groupby(by=['year','item_id']).mean()
-
-#saving only the year list
-saveyear = saveyear['year'].drop_duplicates().reset_index().drop('index',axis=1)
-# display(saveyear)
-saveyeartext = saveyear['year'].tolist()
-# display(saveyeartext)
-categorySimilarity(occup,saveyear,saveyeartext,'year')
+for i in range(4,len(dicpath)):
+    print(f'i is now at : {i}')
+    index=0
+    mydatatest=pp.readRatingData(dicpathtest[i])
+    testX, testY = mydatatest.loc[:, ['user_id',
+                                    'item_id']], mydatatest.loc[:, 'rating']
+    # print(dicpath[i])
+    # model = [KmeansCF('user'),CF('user'),CF('item'),simiModel('user')]  
+    # for j in model:
+    #     print(f'Model: {modelname[index]}')
+    #     tempmodel = j
+    #     tempmodel.fit(dicpath[i])
+    #     predY = tempmodel.predict(testX)
+    #     print(classification_report(testY,predY))
+    #     index+=1
+    
+    print("going here")
+    print(f'Model: {modelname[index]}')
+    tempmodel = CategoricalNB()
+    print(dicpath[i])
+    ratingData = pp.readRatingData(dicpath[i])
+    print(ratingData)
+    xTrain, yTrain = ratingData.loc[:,['user_id','item_id']], ratingData.loc[:, 'rating']
+    tempmodel.fit(xTrain, yTrain)
+    print(tempmodel.class_count_)
+    predY = tempmodel.predict(testX)
+    print(classification_report(testY, predY))
+    exit()
