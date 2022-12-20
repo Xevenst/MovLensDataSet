@@ -59,7 +59,7 @@ class CF:
 
         self.dataMatrix = tempDataMatrix
         self.simMatrix = self.dataMatrix.corr(
-            min_periods=self.threshold, metric=self.metric)
+            min_periods=self.threshold, method=self.metric)
 
     def predict(self, x):
         y = []
@@ -87,15 +87,19 @@ class CF:
             _idx = 0
 
             while _k > 0 and _idx < len(simItemIds.index):
-                if(not pd.isna(self.dataMatrix.loc[notBaseID, simItemIds.loc[_idx, self.base]])):
-                    tempA = simItemIds.loc[_idx, 'corr'] * \
-                        self.dataMatrix.loc[notBaseID,
-                                            simItemIds.loc[_idx, self.base]]
-                    tempB = simItemIds.loc[_idx, 'corr']
-                    a += tempA
-                    b += tempB
-                    _k -= 1
-                _idx += 1
+                try:
+                    if(not pd.isna(self.dataMatrix.loc[notBaseID, simItemIds.loc[_idx, self.base]])):
+                        tempA = simItemIds.loc[_idx, 'corr'] * \
+                            self.dataMatrix.loc[notBaseID,
+                                                simItemIds.loc[_idx, self.base]]
+                        tempB = simItemIds.loc[_idx, 'corr']
+                        a += tempA
+                        b += tempB
+                        _k -= 1
+                    _idx += 1
+                except:
+                    _y = 0
+                    break
             try:
                 # TODO - fix bug. for some reason some movies' ratings are -10,
                 # some others are 6. So bad loll
@@ -339,5 +343,10 @@ class SimCF:
 
 
 # # TODO - Similarity Model for SimCF
-# IBCF = SimCF('item')
-# IBCF.fit('ml-100k\\ua.base')
+IBCF = CF('user')
+IBCF.fit('ml-100k\\ua.base')
+testData = pp.readRatingData('ml-100k\\ua.test')
+testX, testY =  testData.loc[:,['user_id','item_id']],testData.loc[:,'rating']
+
+predY = IBCF.predict(testX)
+print(predY)
