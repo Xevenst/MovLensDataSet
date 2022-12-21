@@ -12,21 +12,21 @@ TODO
 
 '''''''''
 class  simiModel:
-      def __init__(self,base,k=5,threshold=30) -> None:
-        self.k = k
-        self.base = 'user_id' if base == 'user' else 'item_id'
-        self.not_base = 'user_id' if base != 'user' else 'item_id'
-        self.threshold = threshold
-        self.dataDF = 0
-        self.dataMatrix = 0
-        self.simMatrix = 0
-        self.combMatrix=0
-        self.weight= weight
-        self.simRating = None
-        if base=="user":
-            self.length= "user_id"
-        else:
-            self.length= "item_id"
+    def __init__(self,base,k=5,threshold=30,weight=[5,3,3,1]) -> None:
+      self.k = k
+      self.base = 'user_id' if base == 'user' else 'item_id'
+      self.not_base = 'user_id' if base != 'user' else 'item_id'
+      self.threshold = threshold
+      self.dataDF = 0
+      self.dataMatrix = 0
+      self.simMatrix = 0
+      self.combMatrix=0
+      self.weight= weight
+      self.simRating = None
+      if base=="user":
+          self.length= "user_id"
+      else:
+          self.length= "item_id"
 
     def predict(self, x):
       y = []
@@ -138,14 +138,14 @@ class  simiModel:
         self.simMatrix = endresult
         return
                 
-TEA = simiModel('user')
-TEA.fit('ml-100k\\ua.base')
+# TEA = simiModel('user')
+# TEA.fit('ml-100k\\ua.base')
 
-testData = pp.readRatingData('ml-100k\\ua.test')
-testX, testY =  testData.loc[:,['user_id','item_id']],testData.loc[:,'rating']
+# testData = pp.readRatingData('ml-100k\\ua.test')
+# testX, testY =  testData.loc[:,['user_id','item_id']],testData.loc[:,'rating']
 
-predY = TEA.predict(testX)
+# predY = TEA.predict(testX)
 
-from sklearn.metrics import classification_report
+# from sklearn.metrics import classification_report
 
-print(classification_report(testY, predY))
+# print(classification_report(testY, predY))
